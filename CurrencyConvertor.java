@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Currency;
 import java.util.Scanner;
 import org.json.JSONObject;
 public class CurrencyConvertor {
@@ -23,7 +24,7 @@ public class CurrencyConvertor {
 
     public static void convert(String curr1, String curr2, double amt) {
         try {
-            String apiKey = "4e627939312213d0390abca5";  // replace with your actual key
+            String apiKey = "4e627939312213d0390abca5";
             String url = String.format(
                     "https://v6.exchangerate-api.com/v6/%s/pair/%s/%s/%.2f",
                     apiKey, curr1, curr2, amt);
@@ -36,15 +37,22 @@ public class CurrencyConvertor {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-
-
             JSONObject json = new JSONObject(response.body());
 
             if (json.has("conversion_result")) {
                 double result = json.getDouble("conversion_result");
-                System.out.printf("%.2f %s = %.2f %s%n", amt, curr1, result, curr2);
+
+               
+                Currency sourceCurrency = Currency.getInstance(curr1);
+                Currency targetCurrency = Currency.getInstance(curr2);
+                String symbolFrom = sourceCurrency.getSymbol();
+                String symbolTo = targetCurrency.getSymbol();
+
+                System.out.printf("%.2f %s (%s) = %.2f %s (%s)%n",
+                        amt, curr1, symbolFrom,
+                        result, curr2, symbolTo);
             } else {
-                System.out.println(" 'conversion_result' field not found.");
+                System.out.println("Conversion failed. Please check your input or API key.");
             }
         } catch (Exception e) {
             System.out.println("Error occurred: " + e.getMessage());
